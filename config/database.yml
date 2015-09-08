@@ -1,26 +1,41 @@
-<% # Handle old behaviour of official mysql image %>
-<% user = ENV.key?("MYSQL_ROOT_PASSWORD") ? "root" : ENV["MYSQL_USER"] %>
-<% password = ENV.key?("MYSQL_ROOT_PASSWORD") ? ENV["MYSQL_ROOT_PASSWORD"] : ENV["MYSQL_PASSWORD"] %>
-development:
-  adapter: mysql2
-  database: <%= ENV["MYSQL_DATABASE"] %>
+# PostgreSQL. Versions 8.2 and up are supported.
+
+<% user = ENV.key?("POSTGRESQL_ADMIN_PASSWORD") ? "root" : ENV["POSTGRESQL_USER"] %>
+<% password = ENV.key?("POSTGRESQL_ADMIN_PASSWORD") ? ENV["POSTGRESQL_ADMIN_PASSWORD"] : ENV["POSTGRESQL_PASSWORD"] %>
+<% db_service = ENV.fetch("DATABASE_SERVICE_NAME","").upcase %>
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV["POSTGRESQL_MAX_CONNECTIONS"] || 5 %>
   username: <%= user %>
   password: <%= password %>
-  host: <%= ENV["DATABASE_SERVICE_HOST"] %>
-  port: <%= ENV["DATABASE_SERVICE_PORT"] %>
+  host: <%= ENV["#{db_service}_SERVICE_HOST"] %>
+  port: <%= ENV["#{db_service}_SERVICE_PORT"] %>
+  database: <%= ENV["POSTGRESQL_DATABASE"] %>
+
+development:
+  <<: *default
+  #database: blog_development
+  #username:
+  #password:
+  #host:
+  #port:
 
 test:
-  adapter: mysql2
-  database: <%= ENV["MYSQL_DATABASE"] %>
-  username: <%= user %>
-  password: <%= password %>
-  host: <%= ENV["DATABASE_TEST_SERVICE_HOST"] %>
-  port: <%= ENV["DATABASE_TEST_SERVICE_PORT"] %>
+  <<: *default
+  #database: blog_test
+  #username:
+  #password:
+  #host:
+  #port:
 
 production:
-  adapter: mysql2
-  database: <%= ENV["MYSQL_DATABASE"] %>
-  username: <%= user %>
-  password: <%= password %>
-  host: <%= ENV["DATABASE_SERVICE_HOST"] %>
-  port: <%= ENV["DATABASE_SERVICE_PORT"] %>
+  <<: *default
+  #database: blog_production
+  #username: myapp
+  #password: <%= ENV['MYAPP_DATABASE_PASSWORD'] %>
+  #host:
+  #port:
